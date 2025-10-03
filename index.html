@@ -1,0 +1,3198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Professor Attendance Schedule App" />
+    <title>ClassTrack - Attendance Manager</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Theme color for address bar (Android) -->
+    <meta name="theme-color" content="#4361ee" />
+
+    <!-- iOS Support -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ClassTrack" />
+
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary: #3f37c9;
+        --success: #4cc9f0;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border: #dee2e6;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --danger: #e63946;
+        --warning: #ff9e00;
+        --present: #4ade80;
+        --absent: #f87171;
+        --late: #fbbf24;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      body {
+        background-color: #f5f7ff;
+        color: var(--dark);
+        line-height: 1.6;
+        padding-bottom: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+      }
+      header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary);
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--success);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+      }
+      .logout-btn,
+      #install-pwa-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+      }
+      .logout-btn:hover,
+      #install-pwa-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      main {
+        padding: 20px 0;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+      .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-title svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary);
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--dark);
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+      .btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+      .btn-secondary {
+        background: var(--light-gray);
+        color: var(--dark);
+      }
+      .btn-secondary:hover {
+        background: #d1d5db;
+      }
+      .btn-success {
+        background: #2ecc71;
+      }
+      .btn-success:hover {
+        background: #27ae60;
+      }
+      .btn-export {
+        background: var(--success);
+        color: var(--dark);
+      }
+      .btn-export:hover {
+        background: #3ab0d9;
+      }
+      .btn-warning {
+        background: var(--warning);
+        color: white;
+      }
+      .btn-warning:hover {
+        background: #e68a00;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #d62233;
+      }
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+      .class-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .class-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+      }
+      .class-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary);
+      }
+      .class-code {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .class-info {
+        display: flex;
+        justify-content: space-between;
+        color: var(--gray);
+        font-size: 0.9rem;
+      }
+      .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+      .attendance-table th,
+      .attendance-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        min-width: 120px;
+      }
+      .attendance-table th {
+        background-color: var(--light-gray);
+        font-weight: 600;
+        color: var(--dark);
+        position: sticky;
+        top: 0;
+      }
+      .attendance-table tr:last-child td {
+        border-bottom: none;
+      }
+      .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 15px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .table-container::-webkit-scrollbar {
+        height: 8px;
+      }
+      .table-container::-webkit-scrollbar-thumb {
+        background: var(--light-gray);
+        border-radius: 4px;
+      }
+      .table-container::-webkit-scrollbar-thumb:hover {
+        background: var(--gray);
+      }
+      .attendance-table,
+      .overview-table {
+        min-width: 600px;
+      }
+      @media (max-width: 768px) {
+        .status-select {
+          min-width: 140px;
+          padding: 12px;
+          font-size: 16px;
+        }
+        .attendance-table th,
+        .attendance-table td,
+        .overview-table th,
+        .overview-table td {
+          padding: 14px 12px;
+          font-size: 15px;
+        }
+        .delete-date-btn {
+          min-width: 32px;
+          min-height: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+      .status-select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        font-size: 0.9rem;
+        min-width: 120px;
+      }
+      .hidden {
+        display: none;
+      }
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+      }
+      .notification.show {
+        transform: translateX(0);
+      }
+      .notification.success {
+        background: #2ecc71;
+      }
+      .notification.error {
+        background: #e74c3c;
+      }
+      .notification.warning {
+        background: var(--warning);
+      }
+      .date-picker {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .date-picker input {
+        flex: 1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .actions .btn {
+        flex: 1;
+        min-width: 150px;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray);
+      }
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        fill: var(--light-gray);
+        margin-bottom: 20px;
+      }
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+      }
+      .modal.show .modal-content {
+        transform: translateY(0);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .modal-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--gray);
+      }
+      .modal-body {
+        margin-bottom: 20px;
+      }
+      .export-options {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .export-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .export-option:hover {
+        border-color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.05);
+      }
+      .export-option.selected {
+        border-color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.1);
+      }
+      .export-option h3 {
+        margin-bottom: 10px;
+        color: var(--primary);
+      }
+      .export-option p {
+        font-size: 0.9rem;
+        color: var(--gray);
+      }
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+      }
+      .status-present {
+        background-color: var(--present);
+      }
+      .status-absent {
+        background-color: var(--absent);
+      }
+      .status-late {
+        background-color: var(--late);
+      }
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .tab {
+        padding: 12px 24px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--gray);
+        border-bottom: 3px solid transparent;
+      }
+      .tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+      .overview-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .overview-table th,
+      .overview-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      .overview-table th {
+        background-color: var(--light-gray);
+        font-weight: 600;
+        color: var(--dark);
+        position: sticky;
+        top: 0;
+      }
+      .overview-table tr:last-child td {
+        border-bottom: none;
+      }
+      .date-header {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        min-width: 60px;
+        max-width: 60px;
+        text-align: center;
+        padding: 20px 5px !important;
+        position: relative;
+      }
+      .delete-date-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .delete-date-btn:hover {
+        background: #c82333;
+      }
+      .back-btn {
+        background: var(--light-gray);
+        color: var(--dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        margin-bottom: 15px;
+        width: fit-content;
+      }
+      .back-btn:hover {
+        background: #d1d5db;
+      }
+      .confirm-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .confirm-modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .confirm-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        padding: 30px;
+        text-align: center;
+      }
+      .confirm-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        color: var(--danger);
+      }
+      .confirm-message {
+        margin-bottom: 25px;
+        color: var(--dark);
+      }
+      .confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      @media (max-width: 768px) {
+        .header-content {
+          flex-direction: column;
+          gap: 15px;
+        }
+        .class-list {
+          grid-template-columns: 1fr;
+        }
+        .date-picker {
+          flex-direction: column;
+        }
+        .actions {
+          flex-direction: column;
+        }
+        .export-options {
+          flex-direction: column;
+        }
+        .date-header {
+          writing-mode: horizontal-tb;
+          min-width: 120px;
+          max-width: none;
+          padding: 12px 15px !important;
+        }
+        .delete-date-btn {
+          position: static;
+          margin-top: 5px;
+          width: auto;
+          height: auto;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 12px;
+        }
+        .confirm-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="notification" class="notification"></div>
+    <div id="login-screen" class="container">
+      <div class="card" style="max-width: 500px; margin: 100px auto">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Professor Login
+        </div>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter your username" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+          />
+        </div>
+        <button id="login-btn" class="btn btn-block">Login</button>
+        <div
+          style="
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f7fe;
+            border-radius: 8px;
+            font-size: 0.9rem;
+          "
+        >
+          <strong>Note:</strong> For this demo, use username:
+          <code>prof1</code> and password: <code>password123</code>
+        </div>
+      </div>
+    </div>
+    <div id="app" class="hidden">
+      <header>
+        <div class="container header-content">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                />
+              </svg>
+            </div>
+            <span>ClassTrack</span>
+          </div>
+          <div class="user-info">
+            <div class="user-avatar" id="user-initials">P</div>
+            <span id="user-name">Professor Name</span>
+            <button
+              id="install-pwa-btn"
+              class="logout-btn"
+              style="display: none"
+            >
+              Install App
+            </button>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+      <main class="container">
+        <div id="dashboard-view">
+          <div class="tabs">
+            <div class="tab active" data-tab="classes">My Classes</div>
+            <div class="tab" data-tab="overview">Attendance Overview</div>
+          </div>
+          <div id="classes-tab" class="tab-content">
+            <div class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Your Classes
+              </div>
+              <div id="class-list" class="class-list"></div>
+              <div id="no-classes" class="empty-state hidden">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                  />
+                </svg>
+                <h3>No Classes Found</h3>
+                <p>Contact administrator to add your classes</p>
+              </div>
+            </div>
+          </div>
+          <div id="overview-tab" class="tab-content hidden">
+            <div class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Attendance Overview
+              </div>
+              <div class="form-group">
+                <label for="overview-class-select">Select Class</label>
+                <select id="overview-class-select">
+                  <option value="">-- Select a class --</option>
+                </select>
+              </div>
+              <div id="overview-content" class="hidden">
+                <div class="actions" style="margin-top: 0">
+                  <button id="export-overview-btn" class="btn btn-export">
+                    Export Overview
+                  </button>
+                </div>
+                <div class="card" style="margin-top: 20px">
+                  <div class="card-title">
+                    <span id="overview-class-code">CS101</span> Attendance
+                    Overview
+                  </div>
+                  <div id="overview-table-container" style="overflow-x: auto">
+                    <table class="overview-table" id="overview-table"></table>
+                  </div>
+                </div>
+              </div>
+              <div id="no-overview" class="empty-state hidden">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                  />
+                </svg>
+                <h3>No Attendance Records</h3>
+                <p>Save attendance for your classes to see them here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="class-view" class="hidden">
+          <div class="card">
+            <a href="#" id="back-to-class-list" class="back-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to Classes
+            </a>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                />
+              </svg>
+              <span id="current-class-code">CS101</span> Attendance
+            </div>
+            <div id="date-selection" class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Select Date
+              </div>
+              <div class="form-group">
+                <label for="class-date">Class Date</label>
+                <input type="date" id="class-date" />
+              </div>
+              <div class="actions">
+                <button id="select-date-btn" class="btn btn-block">
+                  Select Date
+                </button>
+                <button id="back-from-date" class="btn btn-secondary btn-block">
+                  Back to Classes
+                </button>
+              </div>
+            </div>
+            <div id="attendance-section" class="hidden">
+              <div class="form-group">
+                <label
+                  >Selected Date: <span id="selected-date-display"></span
+                ></label>
+                <div
+                  id="date-status"
+                  class="hidden"
+                  style="
+                    margin-top: 8px;
+                    padding: 10px;
+                    border-radius: 6px;
+                    background: #fff3cd;
+                    color: #856404;
+                  "
+                >
+                  <strong>Note:</strong> This date has been recorded before. You
+                  can update attendance status.
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="attendance-table">
+                  <thead>
+                    <tr>
+                      <th>Student Code</th>
+                      <th>Name</th>
+                      <th>Field</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendance-rows"></tbody>
+                </table>
+              </div>
+              <div class="actions">
+                <button id="save-attendance-btn" class="btn btn-success">
+                  Save Attendance
+                </button>
+                <button id="delete-date-btn" class="btn btn-danger">
+                  Delete This Date
+                </button>
+                <button id="export-attendance-btn" class="btn btn-export">
+                  Export Attendance
+                </button>
+                <button id="back-to-classes" class="btn btn-secondary">
+                  Back to Classes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="export-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">Export Attendance</div>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Select the format for exporting attendance records</p>
+          <div class="export-options">
+            <div class="export-option" data-format="txt">
+              <h3>TXT Format</h3>
+              <p>Plain text file with attendance records</p>
+            </div>
+            <div class="export-option" data-format="excel">
+              <h3>Excel Format</h3>
+              <p>Spreadsheet with all attendance history</p>
+            </div>
+          </div>
+        </div>
+        <button id="confirm-export" class="btn btn-block">Export</button>
+      </div>
+    </div>
+    <div id="delete-modal" class="confirm-modal">
+      <div class="confirm-content">
+        <div class="confirm-title">Delete Attendance Record</div>
+        <div class="confirm-message">
+          Are you sure you want to delete attendance for
+          <span id="delete-date-display"></span>? This action cannot be undone.
+        </div>
+        <div class="confirm-actions">
+          <button id="confirm-delete" class="btn btn-danger">Delete</button>
+          <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="confirm-modal" class="confirm-modal">
+      <div class="confirm-content">
+        <div class="confirm-title">Unsaved Changes</div>
+        <div class="confirm-message">
+          You have unsaved changes. Are you sure you want to leave?
+        </div>
+        <div class="confirm-actions">
+          <button id="confirm-leave" class="btn btn-danger">
+            Leave Anyway
+          </button>
+          <button id="confirm-stay" class="btn btn-secondary">
+            Stay on Page
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // === PWA Setup ===
+      // Register service worker for PWA eligibility
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(console.error);
+        });
+      }
+
+      let deferredPrompt = null;
+      const installPwaBtn = document.getElementById("install-pwa-btn");
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Button will be shown after login
+      });
+
+      // === Original App Code ===
+      function loadStoredData() {
+        const stored = localStorage.getItem("classTrackData");
+        if (stored) {
+          try {
+            return JSON.parse(stored);
+          } catch (e) {
+            console.warn("Corrupted data in localStorage, resetting...");
+          }
+        }
+        return {
+          professors: [
+            { id: "prof1", name: "Dr. Smith", password: "password123" },
+            { id: "prof2", name: "Dr. Johnson", password: "password456" },
+            { id: "prof3", name: "دکتر رادسپهر", password: "test" },
+          ],
+          classes: [
+            {
+              classCode: "sabk-e-zendegi",
+              professorCode: "prof1",
+              students: [
+                {
+                  code: "4032130001139012",
+                  name: "الیاس",
+                  family: "رحمانی فورک",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001110026",
+                  name: "محمدجواد",
+                  family: "خیری",
+                  field: "پرستاری",
+                },
+                {
+                  code: "1402184013",
+                  name: "مریم",
+                  family: "صفائی",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001510030",
+                  name: "یاسمن",
+                  family: "رمضانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510074",
+                  name: "زهرا",
+                  family: "حسنوندعموزاده",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001139001",
+                  name: "یگانه",
+                  family: "احمدی",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001225028",
+                  name: "محمدحسین",
+                  family: "محمدپور",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510061",
+                  name: "ابوالفضل",
+                  family: "نوری",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001139020",
+                  name: "عارفه",
+                  family: "مریدیان",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001510086",
+                  name: "ساجده",
+                  family: "يغمائي",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510085",
+                  name: "کیمیا",
+                  family: "یاهوئی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130011345003",
+                  name: "مطهره",
+                  family: "پرموده",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "1402184010",
+                  name: "زهرا",
+                  family: "سالاری جوبنی",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "1402251014",
+                  name: "علی",
+                  family: "زارعین ریزی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510048",
+                  name: "مبینا",
+                  family: "مجاهدی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225025",
+                  name: "علی اصغر",
+                  family: "حکم آبادی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110007",
+                  name: "نویدرضا",
+                  family: "بقایری",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225010",
+                  name: "مرتضی",
+                  family: "دادبود",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510029",
+                  name: "علیرضا",
+                  family: "رحمانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510005",
+                  name: "سیدمحمدیاسین",
+                  family: "افخمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1400218060",
+                  name: "عرفان",
+                  family: "ملائی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110035",
+                  name: "محمدرضا",
+                  family: "رمضانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510050",
+                  name: "علی",
+                  family: "مرادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110005",
+                  name: "زهرا",
+                  family: "اکبری",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510068",
+                  name: "علی",
+                  family: "کریم نیا",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1401125022",
+                  name: "یاسمین",
+                  family: "سیگاری",
+                  field: "مامایی",
+                },
+                {
+                  code: "4032130001225021",
+                  name: "آرمین",
+                  family: "هواسی زاده",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510052",
+                  name: "زهرا",
+                  family: "مرتضی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510007",
+                  name: "مهشید",
+                  family: "الماسی مرغزار",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1401140022",
+                  name: "مبینا",
+                  family: "علیزاده",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225022",
+                  name: "محمد",
+                  family: "كلاتهء",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510002",
+                  name: "زهرا",
+                  family: "احمدی سومار",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225023",
+                  name: "مرتضی",
+                  family: "برزو",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130011345010",
+                  name: "مهدیه",
+                  family: "قربانی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130011345017",
+                  name: "نفيسه",
+                  family: "فراشياني",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001110011",
+                  name: "محمد",
+                  family: "پری افسای",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510011",
+                  name: "صالحه",
+                  family: "تارویردی دخت",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025013",
+                  name: "زهره",
+                  family: "مرادی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "1402257031",
+                  name: "محمدمنصور",
+                  family: "حاجی عرب",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110020",
+                  name: "علی",
+                  family: "حیدرنیاکلاتی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110004",
+                  name: "نیما",
+                  family: "آزاد",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510051",
+                  name: "یگانه",
+                  family: "مرادیان مقدم",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510057",
+                  name: "فاطمه",
+                  family: "مومنی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110053",
+                  name: "فاطمه زهرا",
+                  family: "قلیچ",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001025006",
+                  name: "حامد",
+                  family: "زارع مقدم",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510055",
+                  name: "مریم",
+                  family: "منصوری بهرغانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225008",
+                  name: "امیر",
+                  family: "حیدری",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110010",
+                  name: "مهشید",
+                  family: "بوژمهرانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510025",
+                  name: "نسترن",
+                  family: "خیامی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1402184006",
+                  name: "مائده",
+                  family: "حسین زاده ملایوسفی",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001510041",
+                  name: "محمد",
+                  family: "عبدالکریمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110021",
+                  name: "ابوالفضل",
+                  family: "حیدریان",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110012",
+                  name: "فائزه",
+                  family: "پیروی فاروجی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001114002",
+                  name: "خیرالله",
+                  family: "تقی زاده بابائی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001510073",
+                  name: "فهيمه",
+                  family: "جهانگيري",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510066",
+                  name: "ریحانه",
+                  family: "کرابی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4031130001510074",
+                  name: "آیسان",
+                  family: "قلعه جوقی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510058",
+                  name: "سانیا",
+                  family: "مؤیدی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225015",
+                  name: "سجاد",
+                  family: "صادقی دارینی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001114007",
+                  name: "مرضیه",
+                  family: "سندگل",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001114010",
+                  name: "علی",
+                  family: "قره گزلی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001510080",
+                  name: "ابوالفضل",
+                  family: "قاسمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510044",
+                  name: "مینا",
+                  family: "فراهانی محمدآبادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110002",
+                  name: "محمدعرفان",
+                  family: "احمدیان",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130011345007",
+                  name: "مریم",
+                  family: "طبسی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001110067",
+                  name: "زهرا",
+                  family: "کیوانلوشهرستانکی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510024",
+                  name: "ستایش",
+                  family: "خورشائی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510087",
+                  name: "امیرحسین",
+                  family: "افشاری",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110062",
+                  name: "ابوالفضل",
+                  family: "هژبرعراقی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "1401263006",
+                  name: "مهسا",
+                  family: "پورصادقی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001510010",
+                  name: "حوریه",
+                  family: "پقه",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110028",
+                  name: "فاطمه",
+                  family: "دلقندی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110041",
+                  name: "زینب",
+                  family: "سندی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110009",
+                  name: "حسین",
+                  family: "بلقان آبادی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110037",
+                  name: "مطهره",
+                  family: "ستایش فر",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510062",
+                  name: "غزل",
+                  family: "هاشمی یزدی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510018",
+                  name: "حانیه",
+                  family: "حسین زاده فرخد",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510001",
+                  name: "ریحانه",
+                  family: "آبرودی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025005",
+                  name: "حسن",
+                  family: "دهنوی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001025012",
+                  name: "علی",
+                  family: "ظهوری ثانی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510026",
+                  name: "محمدصالح",
+                  family: "دستجردی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001114021",
+                  name: "بتول",
+                  family: "طبسی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001510012",
+                  name: "آرام",
+                  family: "توانا",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510049",
+                  name: "نگار",
+                  family: "مرادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110034",
+                  name: "الهه",
+                  family: "رشیدی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510033",
+                  name: "نادیا",
+                  family: "سعیدی رباط",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510067",
+                  name: "ملیکا",
+                  family: "کردستانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110014",
+                  name: "امیرحسین",
+                  family: "جعفرزاده",
+                  field: "پرستاری",
+                },
+                {
+                  code: "1402184019",
+                  name: "متین",
+                  family: "لگزیان",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001110069",
+                  name: "جواد",
+                  family: "یوسفی نوران",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001114013",
+                  name: "زهره",
+                  family: "ملتمسی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001110036",
+                  name: "مهدی",
+                  family: "زعفرانیه",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001114014",
+                  name: "روح الله",
+                  family: "مکارمی فر",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001110022",
+                  name: "محمدمعین",
+                  family: "خزائی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510003",
+                  name: "پریا",
+                  family: "آزادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110049",
+                  name: "فاطمه",
+                  family: "غفوری",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110047",
+                  name: "فاطمه",
+                  family: "عظیمی مقدم",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001139026",
+                  name: "آرینا",
+                  family: "کوشکی",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001510056",
+                  name: "محمدحامد",
+                  family: "مهدی یار",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110040",
+                  name: "محمدجواد",
+                  family: "سلیمی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110068",
+                  name: "مهسا",
+                  family: "یعقوبی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110056",
+                  name: "مهدی یار",
+                  family: "مرادی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110071",
+                  name: "ابوالفضل",
+                  family: "بلوچی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130011345012",
+                  name: "آتنا",
+                  family: "وطن دوست",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001510039",
+                  name: "زهرا",
+                  family: "عابدزاده یامی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001114004",
+                  name: "اسما",
+                  family: "جمال مظفر",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001110001",
+                  name: "محمد",
+                  family: "احمدی اول",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510042",
+                  name: "سهراب",
+                  family: "عسکری باقرآبادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110048",
+                  name: "یلدا",
+                  family: "عین آبادی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001025009",
+                  name: "رضا",
+                  family: "سیدآبادی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001114005",
+                  name: "مرضیه",
+                  family: "حسین آبادی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001225006",
+                  name: "سیدمهدی",
+                  family: "جعفری نسب",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510015",
+                  name: "ریحانه",
+                  family: "جوادیان",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510004",
+                  name: "علی",
+                  family: "اسماعیلی خواه",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1402184025",
+                  name: "سیده اسماء",
+                  family: "هادی فر",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001225003",
+                  name: "محمد",
+                  family: "اسماعیلی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001139017",
+                  name: "نازلی",
+                  family: "قجقی",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001510064",
+                  name: "فرامرز",
+                  family: "همزکانلوئی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510022",
+                  name: "یسنا",
+                  family: "خزائی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510021",
+                  name: "زینب",
+                  family: "خدابنده",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510017",
+                  name: "مبیناسادات",
+                  family: "حسین زاده",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110031",
+                  name: "علیرضا",
+                  family: "رحمانی جرف",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110030",
+                  name: "فاطمه",
+                  family: "رجبی چناربو",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001437001",
+                  name: "رضا",
+                  family: "عاجزی",
+                  field: "مهندسی بهداشت محیط",
+                },
+                {
+                  code: "4032130001437004",
+                  name: "سیمین",
+                  family: "سلطانی نسب",
+                  field: "مهندسی بهداشت محیط",
+                },
+                {
+                  code: "4032130001510032",
+                  name: "سحر",
+                  family: "سبحانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1400263013",
+                  name: "سیداحمدرضا",
+                  family: "سیاوش",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130011345006",
+                  name: "ثنا",
+                  family: "رشیدنژاد",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001225018",
+                  name: "مهدی",
+                  family: "مهری",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001225027",
+                  name: "رضا",
+                  family: "قبديان",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510038",
+                  name: "حسام",
+                  family: "طالع زاری",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1402184007",
+                  name: "سیدامیرحسین",
+                  family: "حیات الغیبی",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001025007",
+                  name: "امیرحسین",
+                  family: "سلامی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510079",
+                  name: "هادی",
+                  family: "فسنقری",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110076",
+                  name: "یاسمن",
+                  family: "کریم",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510019",
+                  name: "نگارالسادات",
+                  family: "حسینی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110054",
+                  name: "زهرا",
+                  family: "گلابی علی آباد",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225013",
+                  name: "محمدصديق",
+                  family: "شهبازي",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001025015",
+                  name: "شایسته",
+                  family: "نظری",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001225001",
+                  name: "مهدی",
+                  family: "ابارشی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "1402184021",
+                  name: "زهره",
+                  family: "مرزانی",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001110023",
+                  name: "عباس",
+                  family: "خلیلی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225029",
+                  name: "اميرحسين",
+                  family: "واحدي مقدم",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001437003",
+                  name: "معصومه",
+                  family: "دلک آبادی",
+                  field: "مهندسی بهداشت محیط",
+                },
+                {
+                  code: "4032130001110019",
+                  name: "سیدامیرمحمد",
+                  family: "حسینی حقیقی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225004",
+                  name: "عارف",
+                  family: "الماسی نژاد",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510060",
+                  name: "محمدمتین",
+                  family: "نورآبادی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510034",
+                  name: "سیامک",
+                  family: "سهیلی نسب",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025004",
+                  name: "پوریا",
+                  family: "حکاک",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001225011",
+                  name: "محمدامین",
+                  family: "دولت آبادی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110042",
+                  name: "فاطمه",
+                  family: "سیدآبادی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510059",
+                  name: "امیرعلی",
+                  family: "نقدی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110060",
+                  name: "محمدعلی",
+                  family: "موسوی ونندی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110057",
+                  name: "فرنازسادات",
+                  family: "مرزانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510046",
+                  name: "فهيمه",
+                  family: "فرهادي",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1402128016",
+                  name: "ناهید",
+                  family: "رحیمی",
+                  field: "تکنولوژی پرتوشناسی",
+                },
+                {
+                  code: "1401140023",
+                  name: "مبینا",
+                  family: "غفاریان ارفعی مهریزی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "1402184008",
+                  name: "فاطمه",
+                  family: "خلیفهء",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001110017",
+                  name: "ماهان",
+                  family: "حامد",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001139021",
+                  name: "ساجده",
+                  family: "همتی",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001139015",
+                  name: "محدثه",
+                  family: "عسکری",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001110024",
+                  name: "مهلا",
+                  family: "خوشرو",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225017",
+                  name: "امیر",
+                  family: "عطاری بجدنی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510076",
+                  name: "زهرا",
+                  family: "شايان مقدم",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225016",
+                  name: "ابوالفضل",
+                  family: "عربخاني",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130011345002",
+                  name: "امیرحسین",
+                  family: "باشتنی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130011345005",
+                  name: "مبینا",
+                  family: "رازقندی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001510063",
+                  name: "کیمیا",
+                  family: "هروی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510014",
+                  name: "پریسا",
+                  family: "جغتائی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510054",
+                  name: "محیا",
+                  family: "ملک قاسمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1402184014",
+                  name: "مریم",
+                  family: "صفاری",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4031130001510038",
+                  name: "فائزه",
+                  family: "رضائی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110052",
+                  name: "سجاد",
+                  family: "قربانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110063",
+                  name: "فاطمه",
+                  family: "وفاپسند",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110064",
+                  name: "فاطمه",
+                  family: "کامیاب",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510013",
+                  name: "ثمین",
+                  family: "جعفرپور",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510023",
+                  name: "عباسعلی",
+                  family: "خورسندی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110008",
+                  name: "رضا",
+                  family: "بلالی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510083",
+                  name: "پرنيا",
+                  family: "هاشمي ثاني",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130014184002",
+                  name: "رسول",
+                  family: "سروری",
+                  field: "آموزش بهداشت و ارتقاء سلامت",
+                },
+                {
+                  code: "4032130001510008",
+                  name: "پری ناز",
+                  family: "باهمت",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110044",
+                  name: "اشکان",
+                  family: "صابری",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001025002",
+                  name: "عرفان",
+                  family: "اروین",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110046",
+                  name: "سعید",
+                  family: "عسکری ازغندی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "1402184005",
+                  name: "فاطمه",
+                  family: "تفقدنظافت",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "4032130001225020",
+                  name: "مرتضی",
+                  family: "نیکان",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110029",
+                  name: "مهدی",
+                  family: "رباط جزی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510070",
+                  name: "امید",
+                  family: "کریمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "1400240017",
+                  name: "محمد",
+                  family: "رحمانی کوه بنانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130014184001",
+                  name: "محمد",
+                  family: "محمودی",
+                  field: "آموزش بهداشت و ارتقاء سلامت",
+                },
+                {
+                  code: "4032130001510078",
+                  name: "نرگس",
+                  family: "طالبی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510065",
+                  name: "تارا",
+                  family: "کاظمی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4031130001510003",
+                  name: "نادیا",
+                  family: "احمدی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110061",
+                  name: "مانی",
+                  family: "نیساری تبریزی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001139014",
+                  name: "محمد",
+                  family: "زرقانی",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001510053",
+                  name: "معصومه",
+                  family: "مرتمي",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001139005",
+                  name: "زهرا",
+                  family: "بویری",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4032130001025010",
+                  name: "مهران",
+                  family: "شبانی مقدم",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510043",
+                  name: "فاطمه",
+                  family: "علی زاده",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110003",
+                  name: "زینب",
+                  family: "اخروی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110006",
+                  name: "ستایش",
+                  family: "باغانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001139016",
+                  name: "هانیه",
+                  family: "فعال",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "1402184003",
+                  name: "مهران",
+                  family: "شبانی مقدم",
+                  field: "تکنولوژی اتاق عمل",
+                },
+                {
+                  code: "1400240041",
+                  name: "زهرا",
+                  family: "داغستانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510028",
+                  name: "میلاد",
+                  family: "رجبیانی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001114015",
+                  name: "مریم",
+                  family: "وجودی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001110066",
+                  name: "محمدپوریا",
+                  family: "کوشکی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110065",
+                  name: "نازنین فاطمه",
+                  family: "کاهانی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001114008",
+                  name: "نیما",
+                  family: "عدالتی اسماعیل زاده",
+                  field: "هوشبری",
+                },
+                {
+                  code: "1401140037",
+                  name: "مبینا",
+                  family: "صفائی نیا",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510045",
+                  name: "امیرمهدی",
+                  family: "فرضی فرد",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025014",
+                  name: "مهران",
+                  family: "مرادی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110032",
+                  name: "سamanه",
+                  family: "رحمتی فر",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510047",
+                  name: "امید",
+                  family: "فروزش",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110051",
+                  name: "سپیده",
+                  family: "فیلو",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110025",
+                  name: "فاطمه",
+                  family: "خیرخواه برج قلعه",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510069",
+                  name: "حسين",
+                  family: "كريمي",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025008",
+                  name: "علیرضا",
+                  family: "سنگ سفیدی",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "1401140026",
+                  name: "مهدی",
+                  family: "فیروزی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510037",
+                  name: "ابوالفضل",
+                  family: "صادقی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110058",
+                  name: "بهنام",
+                  family: "مصطفی مروی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001225007",
+                  name: "نازنین",
+                  family: "حسین زاده",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001510006",
+                  name: "مائده",
+                  family: "اقدسی مقدم",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510040",
+                  name: "عارفه",
+                  family: "عباسیان هراتی",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225002",
+                  name: "نصیر",
+                  family: "اسفندیاری",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "1400232001",
+                  name: "حسنا",
+                  family: "احمدی نسب",
+                  field: "بهداشت عمومی",
+                },
+                {
+                  code: "4031130001510016",
+                  name: "مصطفی",
+                  family: "برادران نجار",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001114012",
+                  name: "مهسا",
+                  family: "مسرور",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130011345001",
+                  name: "مهدی",
+                  family: "اسلامی",
+                  field: "مهندسی بهداشت حرفه ای و ایمنی کار",
+                },
+                {
+                  code: "4032130001510031",
+                  name: "ایلیا",
+                  family: "رئوف",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225014",
+                  name: "سهيل",
+                  family: "شيربان خطبه سرا",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001110059",
+                  name: "سیدشهاب",
+                  family: "موسوی برگیش",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001110027",
+                  name: "فاطمه",
+                  family: "دشتبان داشخانه",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510072",
+                  name: "نازنين",
+                  family: "اميني",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001510035",
+                  name: "مهلاسادات",
+                  family: "سيدموسوي",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001025001",
+                  name: "محمدمهدی",
+                  family: "ابراهیم نژاد",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+                {
+                  code: "4032130001114009",
+                  name: "مهدیس",
+                  family: "فیض آبادی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4032130001110043",
+                  name: "کوثر",
+                  family: "شمیعی",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510077",
+                  name: "پوریا",
+                  family: "شجاعی فرد",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001110055",
+                  name: "مهدیه",
+                  family: "محبی اصل",
+                  field: "پرستاری",
+                },
+                {
+                  code: "4032130001510016",
+                  name: "محمدامین",
+                  family: "حاجی زاده",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001114006",
+                  name: "علیرضا",
+                  family: "رضائی",
+                  field: "هوشبری",
+                },
+                {
+                  code: "4031130001510057",
+                  name: "پرنیان",
+                  family: "شیردل",
+                  field: "پزشکی",
+                },
+                {
+                  code: "4032130001225012",
+                  name: "محمد",
+                  family: "سليماني",
+                  field: "فوریتهای پزشکی پیش بیمارستانی",
+                },
+              ],
+            },
+            {
+              classCode: "CS101",
+              professorCode: "prof1",
+              students: [
+                {
+                  code: "S001",
+                  name: "John",
+                  family: "Doe",
+                  field: "Computer Science",
+                },
+                {
+                  code: "S002",
+                  name: "Jane",
+                  family: "Smith",
+                  field: "Computer Science",
+                },
+                {
+                  code: "S003",
+                  name: "Mike",
+                  family: "Johnson",
+                  field: "Software Engineering",
+                },
+                {
+                  code: "S004",
+                  name: "Sarah",
+                  family: "Williams",
+                  field: "Data Science",
+                },
+              ],
+            },
+            {
+              classCode: "MATH201",
+              professorCode: "prof1",
+              students: [
+                {
+                  code: "S005",
+                  name: "Alice",
+                  family: "Brown",
+                  field: "Mathematics",
+                },
+                {
+                  code: "S006",
+                  name: "Bob",
+                  family: "Wilson",
+                  field: "Mathematics",
+                },
+                {
+                  code: "S007",
+                  name: "Carol",
+                  family: "Davis",
+                  field: "Applied Math",
+                },
+              ],
+            },
+            {
+              classCode: "PHYS301",
+              professorCode: "prof2",
+              students: [
+                {
+                  code: "S008",
+                  name: "David",
+                  family: "Miller",
+                  field: "Physics",
+                },
+                {
+                  code: "S009",
+                  name: "Emma",
+                  family: "Garcia",
+                  field: "Theoretical Physics",
+                },
+              ],
+            },
+          ],
+          attendance: {},
+        };
+      }
+
+      function saveData() {
+        localStorage.setItem("classTrackData", JSON.stringify(classData));
+      }
+
+      let classData = loadStoredData();
+      let currentUser = null;
+      let currentClass = null;
+      let currentDate = null;
+      let selectedExportFormat = null;
+      let isOverviewMode = false;
+      let hasUnsavedChanges = false;
+      let isNavigatingAway = false;
+      let dateToDelete = null;
+      let pendingNavigationAction = null;
+      let originalAttendanceData = null;
+
+      // DOM Elements
+      const loginScreen = document.getElementById("login-screen");
+      const app = document.getElementById("app");
+      const loginBtn = document.getElementById("login-btn");
+      const logoutBtn = document.getElementById("logout-btn");
+      const usernameInput = document.getElementById("username");
+      const passwordInput = document.getElementById("password");
+      const classList = document.getElementById("class-list");
+      const noClasses = document.getElementById("no-classes");
+      const dashboardView = document.getElementById("dashboard-view");
+      const classView = document.getElementById("class-view");
+      const currentClassCode = document.getElementById("current-class-code");
+      const classDateInput = document.getElementById("class-date");
+      const attendanceRows = document.getElementById("attendance-rows");
+      const dateSelection = document.getElementById("date-selection");
+      const attendanceSection = document.getElementById("attendance-section");
+      const selectedDateDisplay = document.getElementById(
+        "selected-date-display"
+      );
+      const dateStatus = document.getElementById("date-status");
+      const selectDateBtn = document.getElementById("select-date-btn");
+      const saveAttendanceBtn = document.getElementById("save-attendance-btn");
+      const deleteDateBtn = document.getElementById("delete-date-btn");
+      const exportAttendanceBtn = document.getElementById(
+        "export-attendance-btn"
+      );
+      const notification = document.getElementById("notification");
+      const userInitials = document.getElementById("user-initials");
+      const userName = document.getElementById("user-name");
+      const exportModal = document.getElementById("export-modal");
+      const closeModal = document.querySelector(".close-modal");
+      const exportOptions = document.querySelectorAll(".export-option");
+      const confirmExportBtn = document.getElementById("confirm-export");
+      const tabs = document.querySelectorAll(".tab");
+      const classesTab = document.getElementById("classes-tab");
+      const overviewTab = document.getElementById("overview-tab");
+      const overviewClassSelect = document.getElementById(
+        "overview-class-select"
+      );
+      const overviewContent = document.getElementById("overview-content");
+      const noOverview = document.getElementById("no-overview");
+      const overviewTable = document.getElementById("overview-table");
+      const overviewClassCode = document.getElementById("overview-class-code");
+      const exportOverviewBtn = document.getElementById("export-overview-btn");
+      const backToClassList = document.getElementById("back-to-class-list");
+      const backFromDate = document.getElementById("back-from-date");
+      const backToClassesBtn = document.getElementById("back-to-classes");
+      const confirmModal = document.getElementById("confirm-modal");
+      const confirmLeaveBtn = document.getElementById("confirm-leave");
+      const confirmStayBtn = document.getElementById("confirm-stay");
+      const deleteModal = document.getElementById("delete-modal");
+      const deleteDateDisplay = document.getElementById("delete-date-display");
+      const confirmDeleteBtn = document.getElementById("confirm-delete");
+      const cancelDeleteBtn = document.getElementById("cancel-delete");
+
+      const today = new Date().toISOString().split("T")[0];
+      classDateInput.value = today;
+      classDateInput.min = today;
+
+      function showNotification(message, type = "success") {
+        notification.textContent = message;
+        notification.className = `notification ${type} show`;
+        setTimeout(() => notification.classList.remove("show"), 3000);
+      }
+
+      function login() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        if (!username || !password) {
+          showNotification("Please enter both username and password", "error");
+          return;
+        }
+        const professor = classData.professors.find(
+          (p) => p.id === username && p.password === password
+        );
+        if (professor) {
+          currentUser = professor;
+          loginScreen.classList.add("hidden");
+          app.classList.remove("hidden");
+          userInitials.textContent = professor.name.charAt(0);
+          userName.textContent = professor.name;
+
+          // Show Install PWA button after login
+          if (deferredPrompt) {
+            installPwaBtn.style.display = "inline-block";
+          }
+
+          loadDashboard();
+          loadOverviewClasses();
+        } else {
+          showNotification("Invalid username or password", "error");
+        }
+      }
+
+      function logout() {
+        if (
+          hasUnsavedChanges &&
+          !confirmNavigation(() => {
+            resetAppState();
+          })
+        ) {
+          return;
+        }
+        resetAppState();
+      }
+
+      function resetAppState() {
+        currentUser = null;
+        currentClass = null;
+        currentDate = null;
+        isOverviewMode = false;
+        hasUnsavedChanges = false;
+        app.classList.add("hidden");
+        loginScreen.classList.remove("hidden");
+        usernameInput.value = "";
+        passwordInput.value = "";
+        installPwaBtn.style.display = "none"; // Hide install button
+      }
+
+      // === PWA Install Handler ===
+      installPwaBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          showNotification("App installed! 🎉");
+          installPwaBtn.style.display = "none";
+        }
+        deferredPrompt = null;
+      });
+
+      // === Rest of your original functions (unchanged) ===
+      function loadDashboard() {
+        const professorClasses = classData.classes.filter(
+          (cls) => cls.professorCode === currentUser.id
+        );
+        if (professorClasses.length === 0) {
+          noClasses.classList.remove("hidden");
+          classList.classList.add("hidden");
+        } else {
+          noClasses.classList.add("hidden");
+          classList.classList.remove("hidden");
+          classList.innerHTML = "";
+          professorClasses.forEach((cls) => {
+            const classCard = document.createElement("div");
+            classCard.className = "class-card";
+            classCard.innerHTML = `
+              <div class="class-code">${cls.classCode}</div>
+              <div class="class-info">
+                <span>${cls.students.length} students</span>
+                <span>View Attendance</span>
+              </div>
+            `;
+            classCard.addEventListener("click", () => openClass(cls));
+            classList.appendChild(classCard);
+          });
+        }
+      }
+
+      function loadOverviewClasses() {
+        const professorClasses = classData.classes.filter(
+          (cls) => cls.professorCode === currentUser.id
+        );
+        overviewClassSelect.innerHTML =
+          '<option value="">-- Select a class --</option>';
+        professorClasses.forEach((cls) => {
+          if (
+            classData.attendance[cls.classCode] &&
+            Object.keys(classData.attendance[cls.classCode]).length > 0
+          ) {
+            const option = document.createElement("option");
+            option.value = cls.classCode;
+            option.textContent = cls.classCode;
+            overviewClassSelect.appendChild(option);
+          }
+        });
+        if (overviewClassSelect.options.length <= 1) {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+        }
+      }
+
+      function openClass(cls) {
+        if (
+          hasUnsavedChanges &&
+          !confirmNavigation(() => {
+            setupClassView(cls);
+          })
+        ) {
+          return;
+        }
+        setupClassView(cls);
+      }
+
+      function setupClassView(cls) {
+        currentClass = cls;
+        currentClassCode.textContent = cls.classCode;
+        dashboardView.classList.add("hidden");
+        classView.classList.remove("hidden");
+        dateSelection.classList.remove("hidden");
+        attendanceSection.classList.add("hidden");
+        hasUnsavedChanges = false;
+        classDateInput.value = new Date().toISOString().split("T")[0];
+      }
+
+      function selectDate() {
+        const selectedDate = classDateInput.value;
+        if (!selectedDate) {
+          showNotification("Please select a date", "error");
+          return;
+        }
+        const hasExistingAttendance =
+          classData.attendance[currentClass.classCode]?.[selectedDate];
+        currentDate = selectedDate;
+        selectedDateDisplay.textContent = formatDate(selectedDate);
+        dateSelection.classList.add("hidden");
+        attendanceSection.classList.remove("hidden");
+        if (hasExistingAttendance) {
+          dateStatus.classList.remove("hidden");
+          showNotification(
+            "This date has been recorded before. You can update attendance status.",
+            "warning"
+          );
+        } else {
+          dateStatus.classList.add("hidden");
+        }
+        loadAttendanceForDate();
+        hasUnsavedChanges = false;
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      function formatShortDate(dateString) {
+        return new Date(dateString).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      function loadAttendanceForDate() {
+        attendanceRows.innerHTML = "";
+        if (!currentClass) return;
+        if (!classData.attendance[currentClass.classCode]) {
+          classData.attendance[currentClass.classCode] = {};
+        }
+        if (!classData.attendance[currentClass.classCode][currentDate]) {
+          classData.attendance[currentClass.classCode][currentDate] = {};
+          currentClass.students.forEach((student) => {
+            classData.attendance[currentClass.classCode][currentDate][
+              student.code
+            ] = "present";
+          });
+        }
+        originalAttendanceData = JSON.parse(
+          JSON.stringify(
+            classData.attendance[currentClass.classCode][currentDate]
+          )
+        );
+        currentClass.students.forEach((student) => {
+          const status =
+            classData.attendance[currentClass.classCode][currentDate][
+              student.code
+            ] || "present";
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${student.code}</td>
+            <td>${student.name} ${student.family}</td>
+            <td>${student.field}</td>
+            <td>
+              <select class="status-select" data-student="${student.code}">
+                <option value="present" ${
+                  status === "present" ? "selected" : ""
+                }>Present</option>
+                <option value="absent" ${
+                  status === "absent" ? "selected" : ""
+                }>Absent</option>
+                <option value="late" ${
+                  status === "late" ? "selected" : ""
+                }>Late</option>
+              </select>
+            </td>
+          `;
+          attendanceRows.appendChild(row);
+        });
+        document.querySelectorAll(".status-select").forEach((select) => {
+          select.addEventListener("change", () => {
+            hasUnsavedChanges = true;
+          });
+        });
+      }
+
+      function saveAttendance() {
+        if (!currentClass || !currentDate) {
+          showNotification("No class or date selected", "error");
+          return;
+        }
+        if (!classData.attendance[currentClass.classCode]) {
+          classData.attendance[currentClass.classCode] = {};
+        }
+        if (!classData.attendance[currentClass.classCode][currentDate]) {
+          classData.attendance[currentClass.classCode][currentDate] = {};
+        }
+        const statusSelects = document.querySelectorAll(".status-select");
+        let changesMade = false;
+        statusSelects.forEach((select) => {
+          const studentCode = select.dataset.student;
+          const newStatus = select.value;
+          const currentStatus =
+            classData.attendance[currentClass.classCode][currentDate][
+              studentCode
+            ] || "present";
+          classData.attendance[currentClass.classCode][currentDate][
+            studentCode
+          ] = newStatus;
+          if (newStatus !== currentStatus) changesMade = true;
+        });
+        const isNewDate = !originalAttendanceData;
+        if (changesMade || isNewDate) {
+          saveData();
+          showNotification("Attendance saved successfully!");
+          hasUnsavedChanges = false;
+          originalAttendanceData = JSON.parse(
+            JSON.stringify(
+              classData.attendance[currentClass.classCode][currentDate]
+            )
+          );
+          if (
+            isOverviewMode &&
+            overviewClassSelect.value === currentClass.classCode
+          ) {
+            loadOverviewTable(currentClass);
+          }
+          loadOverviewClasses();
+        } else {
+          showNotification("No changes to save", "warning");
+        }
+      }
+
+      function showExportModal() {
+        selectedExportFormat = null;
+        exportOptions.forEach((opt) => opt.classList.remove("selected"));
+        exportModal.classList.add("show");
+      }
+
+      function closeExportModal() {
+        exportModal.classList.remove("show");
+      }
+
+      function selectExportFormat(format) {
+        selectedExportFormat = format;
+        exportOptions.forEach((opt) => {
+          opt.classList.toggle("selected", opt.dataset.format === format);
+        });
+      }
+
+      function exportAttendance() {
+        if (!selectedExportFormat) {
+          showNotification("Please select an export format", "error");
+          return;
+        }
+        let exportClass = currentClass;
+        let isOverviewExport = false;
+        if (isOverviewMode) {
+          const code = overviewClassSelect.value;
+          if (!code) {
+            showNotification("Please select a class", "error");
+            return;
+          }
+          exportClass = classData.classes.find((cls) => cls.classCode === code);
+          isOverviewExport = true;
+        }
+        if (!exportClass) return;
+        const classAttendance =
+          classData.attendance[exportClass.classCode] || {};
+        const dates = Object.keys(classAttendance).sort();
+        if (dates.length === 0) {
+          showNotification("No attendance records found", "error");
+          return;
+        }
+        let content = "",
+          fileName = "",
+          mimeType = "";
+        if (selectedExportFormat === "txt") {
+          fileName = `${exportClass.classCode}_attendance.txt`;
+          mimeType = "text/plain";
+          content += `Attendance Records for ${exportClass.classCode}
+Professor: ${currentUser.name}
+========================================
+`;
+          dates.forEach((date) => {
+            content += `Date: ${formatDate(date)}
+----------------------------------------
+`;
+            exportClass.students.forEach((s) => {
+              const status = classAttendance[date][s.code] || "present";
+              content += `${s.code} | ${s.name} ${s.family} | ${s.field} | ${status}
+`;
+            });
+            content += "\n";
+          });
+        } else if (selectedExportFormat === "excel") {
+          fileName = `${exportClass.classCode}_attendance.csv`;
+          mimeType = "text/csv";
+          if (isOverviewExport) {
+            content += "Student Code,Name,Family,Field";
+            dates.forEach((d) => (content += `,${formatShortDate(d)}`));
+            content += "\n";
+            exportClass.students.forEach((s) => {
+              content += `"${s.code}","${s.name}","${s.family}","${s.field}"`;
+              dates.forEach((d) => {
+                const status = classAttendance[d][s.code] || "present";
+                content += `,"${status}"`;
+              });
+              content += "\n";
+            });
+          } else {
+            content = "Date,Student Code,Name,Family,Field,Status\n";
+            dates.forEach((d) => {
+              exportClass.students.forEach((s) => {
+                const status = classAttendance[d][s.code] || "present";
+                content += `"${formatDate(d)}","${s.code}","${s.name}","${
+                  s.family
+                }","${s.field}","${status}"\n`;
+              });
+            });
+          }
+        }
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+        showNotification(`Exported as ${selectedExportFormat.toUpperCase()}!`);
+        closeExportModal();
+      }
+
+      function loadOverviewTable(cls) {
+        const classAttendance = classData.attendance[cls.classCode] || {};
+        const dates = Object.keys(classAttendance).sort();
+        if (dates.length === 0) {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+          return;
+        }
+        noOverview.classList.add("hidden");
+        overviewContent.classList.remove("hidden");
+        overviewClassCode.textContent = cls.classCode;
+        let html =
+          "<thead><tr><th>Student Code</th><th>Name</th><th>Family</th><th>Field</th>";
+        dates.forEach((d) => {
+          html += `<th class="date-header">${formatShortDate(
+            d
+          )}<button class="delete-date-btn" data-date="${d}" title="Delete this date">&times;</button></th>`;
+        });
+        html += "</tr></thead><tbody>";
+        cls.students.forEach((s) => {
+          html += `<tr><td>${s.code}</td><td>${s.name}</td><td>${s.family}</td><td>${s.field}</td>`;
+          dates.forEach((d) => {
+            const status = classAttendance[d][s.code] || "present";
+            let clsName = "",
+              txt = "";
+            if (status === "present") {
+              clsName = "status-present";
+              txt = "✓";
+            } else if (status === "absent") {
+              clsName = "status-absent";
+              txt = "✗";
+            } else if (status === "late") {
+              clsName = "status-late";
+              txt = "!";
+            }
+            html += `<td style="text-align:center;"><div class="status-indicator ${clsName}">${txt}</div></td>`;
+          });
+          html += "</tr>";
+        });
+        html += "</tbody>";
+        overviewTable.innerHTML = html;
+        document.querySelectorAll(".delete-date-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showDeleteConfirmation(btn.dataset.date);
+          });
+        });
+      }
+
+      function showDeleteConfirmation(date) {
+        dateToDelete = date;
+        deleteDateDisplay.textContent = formatDate(date);
+        deleteModal.classList.add("show");
+      }
+
+      function deleteAttendanceRecord() {
+        if (!currentClass || !dateToDelete) return;
+        delete classData.attendance[currentClass.classCode]?.[dateToDelete];
+        if (
+          Object.keys(classData.attendance[currentClass.classCode] || {})
+            .length === 0
+        ) {
+          delete classData.attendance[currentClass.classCode];
+        }
+        saveData();
+        showNotification("Attendance record deleted successfully!");
+        deleteModal.classList.remove("show");
+        if (
+          isOverviewMode &&
+          overviewClassSelect.value === currentClass.classCode
+        ) {
+          loadOverviewTable(currentClass);
+        }
+        loadOverviewClasses();
+        if (currentDate === dateToDelete) {
+          classView.classList.add("hidden");
+          dashboardView.classList.remove("hidden");
+          currentDate = null;
+        }
+        dateToDelete = null;
+      }
+
+      function confirmNavigation(action) {
+        if (hasUnsavedChanges && !isNavigatingAway) {
+          pendingNavigationAction = action;
+          confirmModal.classList.add("show");
+          return false;
+        }
+        return true;
+      }
+
+      function handleBackToClasses() {
+        if (
+          hasUnsavedChanges &&
+          !confirmNavigation(() => {
+            classView.classList.add("hidden");
+            dashboardView.classList.remove("hidden");
+            hasUnsavedChanges = false;
+          })
+        ) {
+          return;
+        }
+        classView.classList.add("hidden");
+        dashboardView.classList.remove("hidden");
+        hasUnsavedChanges = false;
+      }
+
+      // === Event Listeners ===
+      loginBtn.addEventListener("click", login);
+      logoutBtn.addEventListener("click", logout);
+      selectDateBtn.addEventListener("click", selectDate);
+      saveAttendanceBtn.addEventListener("click", saveAttendance);
+      deleteDateBtn.addEventListener(
+        "click",
+        () => currentDate && showDeleteConfirmation(currentDate)
+      );
+      exportAttendanceBtn.addEventListener("click", () => {
+        isOverviewMode = false;
+        showExportModal();
+      });
+      exportOverviewBtn.addEventListener("click", () => {
+        isOverviewMode = true;
+        showExportModal();
+      });
+      backToClassList.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      backFromDate.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      backToClassesBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      closeModal.addEventListener("click", closeExportModal);
+      exportModal.addEventListener(
+        "click",
+        (e) => e.target === exportModal && closeExportModal()
+      );
+      confirmExportBtn.addEventListener("click", exportAttendance);
+      exportOptions.forEach((opt) =>
+        opt.addEventListener("click", () =>
+          selectExportFormat(opt.dataset.format)
+        )
+      );
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          if (hasUnsavedChanges && !confirmNavigation(() => switchTab(tab)))
+            return;
+          switchTab(tab);
+        });
+      });
+
+      function switchTab(tab) {
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        if (tab.dataset.tab === "classes") {
+          classesTab.classList.remove("hidden");
+          overviewTab.classList.add("hidden");
+        } else {
+          classesTab.classList.add("hidden");
+          overviewTab.classList.remove("hidden");
+          if (overviewClassSelect.value) {
+            const cls = classData.classes.find(
+              (c) => c.classCode === overviewClassSelect.value
+            );
+            cls && loadOverviewTable(cls);
+          }
+        }
+      }
+
+      overviewClassSelect.addEventListener("change", () => {
+        if (overviewClassSelect.value) {
+          const cls = classData.classes.find(
+            (c) => c.classCode === overviewClassSelect.value
+          );
+          cls && loadOverviewTable(cls);
+        } else {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+        }
+      });
+
+      confirmDeleteBtn.addEventListener("click", deleteAttendanceRecord);
+      cancelDeleteBtn.addEventListener("click", () => {
+        deleteModal.classList.remove("show");
+        dateToDelete = null;
+      });
+      confirmLeaveBtn.addEventListener("click", () => {
+        confirmModal.classList.remove("show");
+        isNavigatingAway = true;
+        pendingNavigationAction && pendingNavigationAction();
+        isNavigatingAway = false;
+        hasUnsavedChanges = false;
+      });
+      confirmStayBtn.addEventListener("click", () => {
+        confirmModal.classList.remove("show");
+        pendingNavigationAction = null;
+      });
+
+      window.addEventListener("beforeunload", (e) => {
+        if (hasUnsavedChanges) {
+          e.preventDefault();
+          e.returnValue = "";
+          return "";
+        }
+      });
+
+      classDateInput.value = new Date().toISOString().split("T")[0];
+    </script>
+  </body>
+</html>
