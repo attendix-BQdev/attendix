@@ -1,0 +1,80 @@
+{
+  "professors": [
+    { "id": "prof1", "name": "Dr. Smith" },
+    { "id": "prof2", "name": "Dr. Johnson" }
+  ],
+  "classes": [
+    {
+      "classCode": "CS101",
+      "professorCode": "prof1",
+      "students": [
+        {
+          "code": "S001",
+          "name": "John",
+          "family": "Doe",
+          "field": "Computer Science"
+        },
+        {
+          "code": "S002",
+          "name": "Jane",
+          "family": "Smith",
+          "field": "Computer Science"
+        },
+        {
+          "code": "S003",
+          "name": "Mike",
+          "family": "Johnson",
+          "field": "Software Engineering"
+        },
+        {
+          "code": "S004",
+          "name": "Sarah",
+          "family": "Williams",
+          "field": "Data Science"
+        }
+      ]
+    },
+    {
+      "classCode": "MATH201",
+      "professorCode": "prof1",
+      "students": [
+        {
+          "code": "S005",
+          "name": "Alice",
+          "family": "Brown",
+          "field": "Mathematics"
+        },
+        {
+          "code": "S006",
+          "name": "Bob",
+          "family": "Wilson",
+          "field": "Mathematics"
+        },
+        {
+          "code": "S007",
+          "name": "Carol",
+          "family": "Davis",
+          "field": "Applied Math"
+        }
+      ]
+    },
+    {
+      "classCode": "PHYS301",
+      "professorCode": "prof2",
+      "students": [
+        {
+          "code": "S008",
+          "name": "David",
+          "family": "Miller",
+          "field": "Physics"
+        },
+        {
+          "code": "S009",
+          "name": "Emma",
+          "family": "Garcia",
+          "field": "Theoretical Physics"
+        }
+      ]
+    }
+  ]
+}

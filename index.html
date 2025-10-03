@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Professor Attendance Schedule App" />
+    <title>ClassTrack - Attendance Manager</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4361ee" />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary: #3f37c9;
+        --success: #4cc9f0;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border: #dee2e6;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --danger: #e63946;
+        --warning: #ff9e00;
+        --present: #4ade80;
+        --absent: #f87171;
+        --late: #fbbf24;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      body {
+        background-color: #f5f7ff;
+        color: var(--dark);
+        line-height: 1.6;
+        padding-bottom: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+      }
+      header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary);
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--success);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+      }
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+      }
+      .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      main {
+        padding: 20px 0;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+      .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-title svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary);
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--dark);
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+      .btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+      .btn-secondary {
+        background: var(--light-gray);
+        color: var(--dark);
+      }
+      .btn-secondary:hover {
+        background: #d1d5db;
+      }
+      .btn-success {
+        background: #2ecc71;
+      }
+      .btn-success:hover {
+        background: #27ae60;
+      }
+      .btn-export {
+        background: var(--success);
+        color: var(--dark);
+      }
+      .btn-export:hover {
+        background: #3ab0d9;
+      }
+      .btn-warning {
+        background: var(--warning);
+        color: white;
+      }
+      .btn-warning:hover {
+        background: #e68a00;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #d62233;
+      }
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+      .class-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .class-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+      }
+      .class-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary);
+      }
+      .class-code {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .class-info {
+        display: flex;
+        justify-content: space-between;
+        color: var(--gray);
+        font-size: 0.9rem;
+      }
+      .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+      .attendance-table th,
+      .attendance-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        min-width: 120px;
+      }
+      .attendance-table th {
+        background-color: var(--light-gray);
+        font-weight: 600;
+        color: var(--dark);
+        position: sticky;
+        top: 0;
+      }
+      .attendance-table tr:last-child td {
+        border-bottom: none;
+      }
+      .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 15px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .table-container::-webkit-scrollbar {
+        height: 8px;
+      }
+      .table-container::-webkit-scrollbar-thumb {
+        background: var(--light-gray);
+        border-radius: 4px;
+      }
+      .table-container::-webkit-scrollbar-thumb:hover {
+        background: var(--gray);
+      }
+      .attendance-table,
+      .overview-table {
+        min-width: 600px;
+      }
+      @media (max-width: 768px) {
+        .status-select {
+          min-width: 140px;
+          padding: 12px;
+          font-size: 16px;
+        }
+        .attendance-table th,
+        .attendance-table td,
+        .overview-table th,
+        .overview-table td {
+          padding: 14px 12px;
+          font-size: 15px;
+        }
+        .delete-date-btn {
+          min-width: 32px;
+          min-height: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+      .status-select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        font-size: 0.9rem;
+        min-width: 120px;
+      }
+      .hidden {
+        display: none;
+      }
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+      }
+      .notification.show {
+        transform: translateX(0);
+      }
+      .notification.success {
+        background: #2ecc71;
+      }
+      .notification.error {
+        background: #e74c3c;
+      }
+      .notification.warning {
+        background: var(--warning);
+      }
+      .date-picker {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .date-picker input {
+        flex: 1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .actions .btn {
+        flex: 1;
+        min-width: 150px;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray);
+      }
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        fill: var(--light-gray);
+        margin-bottom: 20px;
+      }
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+      }
+      .modal.show .modal-content {
+        transform: translateY(0);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .modal-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--gray);
+      }
+      .modal-body {
+        margin-bottom: 20px;
+      }
+      .export-options {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .export-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .export-option:hover {
+        border-color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.05);
+      }
+      .export-option.selected {
+        border-color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.1);
+      }
+      .export-option h3 {
+        margin-bottom: 10px;
+        color: var(--primary);
+      }
+      .export-option p {
+        font-size: 0.9rem;
+        color: var(--gray);
+      }
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+      }
+      .status-present {
+        background-color: var(--present);
+      }
+      .status-absent {
+        background-color: var(--absent);
+      }
+      .status-late {
+        background-color: var(--late);
+      }
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .tab {
+        padding: 12px 24px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--gray);
+        border-bottom: 3px solid transparent;
+      }
+      .tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+      .overview-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .overview-table th,
+      .overview-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      .overview-table th {
+        background-color: var(--light-gray);
+        font-weight: 600;
+        color: var(--dark);
+        position: sticky;
+        top: 0;
+      }
+      .overview-table tr:last-child td {
+        border-bottom: none;
+      }
+      .date-header {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        min-width: 60px;
+        max-width: 60px;
+        text-align: center;
+        padding: 20px 5px !important;
+        position: relative;
+      }
+      .delete-date-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .delete-date-btn:hover {
+        background: #c82333;
+      }
+      .back-btn {
+        background: var(--light-gray);
+        color: var(--dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        margin-bottom: 15px;
+        width: fit-content;
+      }
+      .back-btn:hover {
+        background: #d1d5db;
+      }
+      .confirm-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .confirm-modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .confirm-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        padding: 30px;
+        text-align: center;
+      }
+      .confirm-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        color: var(--danger);
+      }
+      .confirm-message {
+        margin-bottom: 25px;
+        color: var(--dark);
+      }
+      .confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      @media (max-width: 768px) {
+        .header-content {
+          flex-direction: column;
+          gap: 15px;
+        }
+        .class-list {
+          grid-template-columns: 1fr;
+        }
+        .date-picker {
+          flex-direction: column;
+        }
+        .actions {
+          flex-direction: column;
+        }
+        .export-options {
+          flex-direction: column;
+        }
+        .date-header {
+          writing-mode: horizontal-tb;
+          min-width: 120px;
+          max-width: none;
+          padding: 12px 15px !important;
+        }
+        .delete-date-btn {
+          position: static;
+          margin-top: 5px;
+          width: auto;
+          height: auto;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 12px;
+        }
+        .confirm-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="notification" class="notification"></div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="container">
+      <div class="card" style="max-width: 500px; margin: 100px auto">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Professor Login
+        </div>
+        <div class="form-group">
+          <label for="prof-code">Professor Code</label>
+          <input
+            type="text"
+            id="prof-code"
+            placeholder="Enter your professor code (e.g., prof1)"
+          />
+        </div>
+        <button id="login-btn" class="btn btn-block">Enter</button>
+        <div
+          style="
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f7fe;
+            border-radius: 8px;
+            font-size: 0.9rem;
+          "
+        >
+          <strong>Note:</strong> Use code: <code>prof1</code> or
+          <code>prof2</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+      <header>
+        <div class="container header-content">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                />
+              </svg>
+            </div>
+            <span>ClassTrack</span>
+          </div>
+          <div class="user-info">
+            <div class="user-avatar" id="user-initials">P</div>
+            <span id="user-name">Professor Name</span>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+      <main class="container">
+        <div id="dashboard-view">
+          <div class="tabs">
+            <div class="tab active" data-tab="classes">My Classes</div>
+            <div class="tab" data-tab="overview">Attendance Overview</div>
+          </div>
+          <div id="classes-tab" class="tab-content">
+            <div class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Your Classes
+              </div>
+              <div id="class-list" class="class-list"></div>
+              <div id="no-classes" class="empty-state hidden">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                  />
+                </svg>
+                <h3>No Classes Found</h3>
+                <p>Contact administrator to add your classes</p>
+              </div>
+            </div>
+          </div>
+          <div id="overview-tab" class="tab-content hidden">
+            <div class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Attendance Overview
+              </div>
+              <div class="form-group">
+                <label for="overview-class-select">Select Class</label>
+                <select id="overview-class-select">
+                  <option value="">-- Select a class --</option>
+                </select>
+              </div>
+              <div id="overview-content" class="hidden">
+                <div class="actions" style="margin-top: 0">
+                  <button id="export-overview-btn" class="btn btn-export">
+                    Export Overview
+                  </button>
+                </div>
+                <div class="card" style="margin-top: 20px">
+                  <div class="card-title">
+                    <span id="overview-class-code">CS101</span> Attendance
+                    Overview
+                  </div>
+                  <div id="overview-table-container" style="overflow-x: auto">
+                    <table class="overview-table" id="overview-table"></table>
+                  </div>
+                </div>
+              </div>
+              <div id="no-overview" class="empty-state hidden">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                  />
+                </svg>
+                <h3>No Attendance Records</h3>
+                <p>Save attendance for your classes to see them here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="class-view" class="hidden">
+          <div class="card">
+            <a href="#" id="back-to-class-list" class="back-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to Classes
+            </a>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                />
+              </svg>
+              <span id="current-class-code">CS101</span> Attendance
+            </div>
+            <div id="date-selection" class="card">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Select Date
+              </div>
+              <div class="form-group">
+                <label for="class-date">Class Date</label>
+                <input type="date" id="class-date" />
+              </div>
+              <div class="actions">
+                <button id="select-date-btn" class="btn btn-block">
+                  Select Date
+                </button>
+                <button id="back-from-date" class="btn btn-secondary btn-block">
+                  Back to Classes
+                </button>
+              </div>
+            </div>
+            <div id="attendance-section" class="hidden">
+              <div class="form-group">
+                <label
+                  >Selected Date: <span id="selected-date-display"></span
+                ></label>
+                <div
+                  id="date-status"
+                  class="hidden"
+                  style="
+                    margin-top: 8px;
+                    padding: 10px;
+                    border-radius: 6px;
+                    background: #fff3cd;
+                    color: #856404;
+                  "
+                >
+                  <strong>Note:</strong> This date has been recorded before. You
+                  can update attendance status.
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="attendance-table">
+                  <thead>
+                    <tr>
+                      <th>Student Code</th>
+                      <th>Name</th>
+                      <th>Field</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendance-rows"></tbody>
+                </table>
+              </div>
+              <div class="actions">
+                <button id="save-attendance-btn" class="btn btn-success">
+                  Save Attendance
+                </button>
+                <button id="delete-date-btn" class="btn btn-danger">
+                  Delete This Date
+                </button>
+                <button id="export-attendance-btn" class="btn btn-export">
+                  Export Attendance
+                </button>
+                <button id="back-to-classes" class="btn btn-secondary">
+                  Back to Classes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="export-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">Export Attendance</div>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Select the format for exporting attendance records</p>
+          <div class="export-options">
+            <div class="export-option" data-format="txt">
+              <h3>TXT Format</h3>
+              <p>Plain text file with attendance records</p>
+            </div>
+            <div class="export-option" data-format="excel">
+              <h3>Excel Format</h3>
+              <p>Spreadsheet with all attendance history</p>
+            </div>
+          </div>
+        </div>
+        <button id="confirm-export" class="btn btn-block">Export</button>
+      </div>
+    </div>
+
+    <div id="delete-modal" class="confirm-modal">
+      <div class="confirm-content">
+        <div class="confirm-title">Delete Attendance Record</div>
+        <div class="confirm-message">
+          Are you sure you want to delete attendance for
+          <span id="delete-date-display"></span>? This action cannot be undone.
+        </div>
+        <div class="confirm-actions">
+          <button id="confirm-delete" class="btn btn-danger">Delete</button>
+          <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirm-modal" class="confirm-modal">
+      <div class="confirm-content">
+        <div class="confirm-title">Unsaved Changes</div>
+        <div class="confirm-message">
+          You have unsaved changes. Are you sure you want to leave?
+        </div>
+        <div class="confirm-actions">
+          <button id="confirm-leave" class="btn btn-danger">
+            Leave Anyway
+          </button>
+          <button id="confirm-stay" class="btn btn-secondary">
+            Stay on Page
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // =============== INDEXEDDB ===============
+      const DB_NAME = "ClassTrackDB";
+      const DB_VERSION = 1;
+
+      async function openDB() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onerror = () => reject(req.error);
+          req.onsuccess = () => resolve(req.result);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("attendance")) {
+              db.createObjectStore("attendance", { keyPath: "key" });
+            }
+            if (!db.objectStoreNames.contains("metadata")) {
+              db.createObjectStore("metadata", { keyPath: "key" });
+            }
+          };
+        });
+      }
+
+      async function saveAttendance(classCode, date, records) {
+        const db = await openDB();
+        const tx = db.transaction("attendance", "readwrite");
+        await tx
+          .objectStore("attendance")
+          .put({ key: `${classCode}::${date}`, classCode, date, records });
+        await tx.complete;
+      }
+
+      async function loadAttendance(classCode, date) {
+        const db = await openDB();
+        const tx = db.transaction("attendance", "readonly");
+        const req = tx.objectStore("attendance").get(`${classCode}::${date}`);
+        return new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result?.records || null);
+          req.onerror = () => resolve(null);
+        });
+      }
+
+      async function deleteAttendance(classCode, date) {
+        const db = await openDB();
+        const tx = db.transaction("attendance", "readwrite");
+        await tx.objectStore("attendance").delete(`${classCode}::${date}`);
+        await tx.complete;
+      }
+
+      async function getAllAttendanceKeys() {
+        const db = await openDB();
+        const tx = db.transaction("attendance", "readonly");
+        const req = tx.objectStore("attendance").getAllKeys();
+        return new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      }
+
+      async function saveActiveProfessor(profId) {
+        const db = await openDB();
+        const tx = db.transaction("metadata", "readwrite");
+        await tx
+          .objectStore("metadata")
+          .put({ key: "activeProfessor", value: profId });
+        await tx.complete;
+      }
+
+      async function getActiveProfessor() {
+        const db = await openDB();
+        const tx = db.transaction("metadata", "readonly");
+        const req = tx.objectStore("metadata").get("activeProfessor");
+        return new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result?.value || null);
+          req.onerror = () => resolve(null);
+        });
+      }
+
+      // =============== MAIN APP ===============
+      let baseData = null;
+      let currentUser = null;
+      let currentClass = null;
+      let currentDate = null;
+      let selectedExportFormat = null;
+      let isOverviewMode = false;
+      let hasUnsavedChanges = false;
+      let isNavigatingAway = false;
+      let dateToDelete = null;
+      let pendingNavigationAction = null;
+      let originalAttendanceData = null;
+
+      // DOM Elements
+      const loginScreen = document.getElementById("login-screen");
+      const app = document.getElementById("app");
+      const loginBtn = document.getElementById("login-btn");
+      const logoutBtn = document.getElementById("logout-btn");
+      const profCodeInput = document.getElementById("prof-code");
+      const classList = document.getElementById("class-list");
+      const noClasses = document.getElementById("no-classes");
+      const dashboardView = document.getElementById("dashboard-view");
+      const classView = document.getElementById("class-view");
+      const currentClassCode = document.getElementById("current-class-code");
+      const classDateInput = document.getElementById("class-date");
+      const attendanceRows = document.getElementById("attendance-rows");
+      const dateSelection = document.getElementById("date-selection");
+      const attendanceSection = document.getElementById("attendance-section");
+      const selectedDateDisplay = document.getElementById(
+        "selected-date-display"
+      );
+      const dateStatus = document.getElementById("date-status");
+      const selectDateBtn = document.getElementById("select-date-btn");
+      const saveAttendanceBtn = document.getElementById("save-attendance-btn");
+      const deleteDateBtn = document.getElementById("delete-date-btn");
+      const exportAttendanceBtn = document.getElementById(
+        "export-attendance-btn"
+      );
+      const notification = document.getElementById("notification");
+      const userInitials = document.getElementById("user-initials");
+      const userName = document.getElementById("user-name");
+      const exportModal = document.getElementById("export-modal");
+      const closeModal = document.querySelector(".close-modal");
+      const exportOptions = document.querySelectorAll(".export-option");
+      const confirmExportBtn = document.getElementById("confirm-export");
+      const tabs = document.querySelectorAll(".tab");
+      const classesTab = document.getElementById("classes-tab");
+      const overviewTab = document.getElementById("overview-tab");
+      const overviewClassSelect = document.getElementById(
+        "overview-class-select"
+      );
+      const overviewContent = document.getElementById("overview-content");
+      const noOverview = document.getElementById("no-overview");
+      const overviewTable = document.getElementById("overview-table");
+      const overviewClassCode = document.getElementById("overview-class-code");
+      const exportOverviewBtn = document.getElementById("export-overview-btn");
+      const backToClassList = document.getElementById("back-to-class-list");
+      const backFromDate = document.getElementById("back-from-date");
+      const backToClassesBtn = document.getElementById("back-to-classes");
+      const confirmModal = document.getElementById("confirm-modal");
+      const confirmLeaveBtn = document.getElementById("confirm-leave");
+      const confirmStayBtn = document.getElementById("confirm-stay");
+      const deleteModal = document.getElementById("delete-modal");
+      const deleteDateDisplay = document.getElementById("delete-date-display");
+      const confirmDeleteBtn = document.getElementById("confirm-delete");
+      const cancelDeleteBtn = document.getElementById("cancel-delete");
+
+      // Set today as default
+      const today = new Date().toISOString().split("T")[0];
+      classDateInput.value = today;
+      classDateInput.min = today;
+
+      function showNotification(message, type = "success") {
+        notification.textContent = message;
+        notification.className = `notification ${type} show`;
+        setTimeout(() => notification.classList.remove("show"), 3000);
+      }
+
+      async function loadBaseData() {
+        try {
+          const res = await fetch("/data.json");
+          baseData = await res.json();
+        } catch (e) {
+          console.error("Failed to load data.json", e);
+          baseData = { professors: [], classes: [] };
+        }
+      }
+
+      async function login() {
+        const code = profCodeInput.value.trim();
+        if (!code) {
+          showNotification("Please enter a professor code", "error");
+          return;
+        }
+        const professor = baseData.professors.find((p) => p.id === code);
+        if (!professor) {
+          showNotification("Professor not found", "error");
+          return;
+        }
+        currentUser = professor;
+        await saveActiveProfessor(code);
+        loginScreen.classList.add("hidden");
+        app.classList.remove("hidden");
+        userInitials.textContent = professor.name.charAt(0);
+        userName.textContent = professor.name;
+        loadDashboard();
+        loadOverviewClasses();
+      }
+
+      function logout() {
+        if (hasUnsavedChanges && !confirmNavigation(() => resetAppState()))
+          return;
+        resetAppState();
+      }
+
+      function resetAppState() {
+        currentUser = null;
+        currentClass = null;
+        currentDate = null;
+        isOverviewMode = false;
+        hasUnsavedChanges = false;
+        app.classList.add("hidden");
+        loginScreen.classList.remove("hidden");
+        profCodeInput.value = "";
+      }
+
+      function loadDashboard() {
+        const professorClasses = baseData.classes.filter(
+          (cls) => cls.professorCode === currentUser.id
+        );
+        if (professorClasses.length === 0) {
+          noClasses.classList.remove("hidden");
+          classList.classList.add("hidden");
+        } else {
+          noClasses.classList.add("hidden");
+          classList.classList.remove("hidden");
+          classList.innerHTML = "";
+          professorClasses.forEach((cls) => {
+            const classCard = document.createElement("div");
+            classCard.className = "class-card";
+            classCard.innerHTML = `
+            <div class="class-code">${cls.classCode}</div>
+            <div class="class-info">
+              <span>${cls.students.length} students</span>
+              <span>View Attendance</span>
+            </div>
+          `;
+            classCard.addEventListener("click", () => openClass(cls));
+            classList.appendChild(classCard);
+          });
+        }
+      }
+
+      async function loadOverviewClasses() {
+        const professorClasses = baseData.classes.filter(
+          (cls) => cls.professorCode === currentUser.id
+        );
+        overviewClassSelect.innerHTML =
+          '<option value="">-- Select a class --</option>';
+        for (const cls of professorClasses) {
+          const keys = await getAllAttendanceKeys();
+          const hasRecords = keys.some((k) =>
+            k.startsWith(`${cls.classCode}::`)
+          );
+          if (hasRecords) {
+            const option = document.createElement("option");
+            option.value = cls.classCode;
+            option.textContent = cls.classCode;
+            overviewClassSelect.appendChild(option);
+          }
+        }
+        if (overviewClassSelect.options.length <= 1) {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+        }
+      }
+
+      async function openClass(cls) {
+        if (hasUnsavedChanges && !confirmNavigation(() => setupClassView(cls)))
+          return;
+        setupClassView(cls);
+      }
+
+      function setupClassView(cls) {
+        currentClass = cls;
+        currentClassCode.textContent = cls.classCode;
+        dashboardView.classList.add("hidden");
+        classView.classList.remove("hidden");
+        dateSelection.classList.remove("hidden");
+        attendanceSection.classList.add("hidden");
+        hasUnsavedChanges = false;
+        classDateInput.value = today;
+      }
+
+      async function selectDate() {
+        const selectedDate = classDateInput.value;
+        if (!selectedDate) {
+          showNotification("Please select a date", "error");
+          return;
+        }
+        const existing = await loadAttendance(
+          currentClass.classCode,
+          selectedDate
+        );
+        currentDate = selectedDate;
+        selectedDateDisplay.textContent = formatDate(selectedDate);
+        dateSelection.classList.add("hidden");
+        attendanceSection.classList.remove("hidden");
+        if (existing) {
+          dateStatus.classList.remove("hidden");
+          showNotification(
+            "This date has been recorded before. You can update attendance status.",
+            "warning"
+          );
+        } else {
+          dateStatus.classList.add("hidden");
+        }
+        await loadAttendanceForDate();
+        hasUnsavedChanges = false;
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      function formatShortDate(dateString) {
+        return new Date(dateString).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      async function loadAttendanceForDate() {
+        attendanceRows.innerHTML = "";
+        let records = await loadAttendance(currentClass.classCode, currentDate);
+        if (!records) {
+          records = {};
+          currentClass.students.forEach((s) => (records[s.code] = "present"));
+        }
+        originalAttendanceData = JSON.parse(JSON.stringify(records));
+        currentClass.students.forEach((student) => {
+          const status = records[student.code] || "present";
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${student.code}</td>
+          <td>${student.name} ${student.family}</td>
+          <td>${student.field}</td>
+          <td>
+            <select class="status-select" data-student="${student.code}">
+              <option value="present" ${
+                status === "present" ? "selected" : ""
+              }>Present</option>
+              <option value="absent" ${
+                status === "absent" ? "selected" : ""
+              }>Absent</option>
+              <option value="late" ${
+                status === "late" ? "selected" : ""
+              }>Late</option>
+            </select>
+          </td>
+        `;
+          attendanceRows.appendChild(row);
+        });
+        document.querySelectorAll(".status-select").forEach((select) => {
+          select.addEventListener("change", () => (hasUnsavedChanges = true));
+        });
+      }
+
+      async function saveAttendance() {
+        if (!currentClass || !currentDate) {
+          showNotification("No class or date selected", "error");
+          return;
+        }
+        const statusSelects = document.querySelectorAll(".status-select");
+        const records = {};
+        statusSelects.forEach((select) => {
+          records[select.dataset.student] = select.value;
+        });
+        await saveAttendance(currentClass.classCode, currentDate, records);
+        showNotification("Attendance saved successfully!");
+        hasUnsavedChanges = false;
+        originalAttendanceData = JSON.parse(JSON.stringify(records));
+        if (
+          isOverviewMode &&
+          overviewClassSelect.value === currentClass.classCode
+        ) {
+          await loadOverviewTable(currentClass);
+        }
+        await loadOverviewClasses();
+      }
+
+      function showExportModal() {
+        selectedExportFormat = null;
+        exportOptions.forEach((opt) => opt.classList.remove("selected"));
+        exportModal.classList.add("show");
+      }
+
+      function closeExportModal() {
+        exportModal.classList.remove("show");
+      }
+
+      function selectExportFormat(format) {
+        selectedExportFormat = format;
+        exportOptions.forEach((opt) => {
+          opt.classList.toggle("selected", opt.dataset.format === format);
+        });
+      }
+
+      async function exportAttendance() {
+        if (!selectedExportFormat) {
+          showNotification("Please select an export format", "error");
+          return;
+        }
+        let exportClass = currentClass;
+        let isOverviewExport = false;
+        if (isOverviewMode) {
+          const code = overviewClassSelect.value;
+          if (!code) {
+            showNotification("Please select a class", "error");
+            return;
+          }
+          exportClass = baseData.classes.find((cls) => cls.classCode === code);
+          isOverviewExport = true;
+        }
+        if (!exportClass) return;
+
+        // Gather all dates for this class
+        const keys = await getAllAttendanceKeys();
+        const dates = [
+          ...new Set(
+            keys
+              .filter((k) => k.startsWith(`${exportClass.classCode}::`))
+              .map((k) => k.split("::")[1])
+          ),
+        ].sort();
+
+        if (dates.length === 0) {
+          showNotification("No attendance records found", "error");
+          return;
+        }
+
+        let content = "",
+          fileName = "",
+          mimeType = "";
+        if (selectedExportFormat === "txt") {
+          fileName = `${exportClass.classCode}_attendance.txt`;
+          mimeType = "text/plain";
+          content += `Attendance Records for ${exportClass.classCode}\nProfessor: ${currentUser.name}\n========================================\n`;
+          for (const date of dates) {
+            const records =
+              (await loadAttendance(exportClass.classCode, date)) || {};
+            content += `Date: ${formatDate(
+              date
+            )}\n----------------------------------------\n`;
+            exportClass.students.forEach((s) => {
+              const status = records[s.code] || "present";
+              content += `${s.code} | ${s.name} ${s.family} | ${s.field} | ${status}\n`;
+            });
+            content += "\n";
+          }
+        } else if (selectedExportFormat === "excel") {
+          fileName = `${exportClass.classCode}_attendance.csv`;
+          mimeType = "text/csv";
+          if (isOverviewExport) {
+            content += "Student Code,Name,Family,Field";
+            dates.forEach((d) => (content += `,${formatShortDate(d)}`));
+            content += "\n";
+            for (const s of exportClass.students) {
+              content += `"${s.code}","${s.name}","${s.family}","${s.field}"`;
+              for (const d of dates) {
+                const records =
+                  (await loadAttendance(exportClass.classCode, d)) || {};
+                const status = records[s.code] || "present";
+                content += `,"${status}"`;
+              }
+              content += "\n";
+            }
+          } else {
+            content = "Date,Student Code,Name,Family,Field,Status\n";
+            for (const d of dates) {
+              const records =
+                (await loadAttendance(exportClass.classCode, d)) || {};
+              exportClass.students.forEach((s) => {
+                const status = records[s.code] || "present";
+                content += `"${formatDate(d)}","${s.code}","${s.name}","${
+                  s.family
+                }","${s.field}","${status}"\n`;
+              });
+            }
+          }
+        }
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+        showNotification(`Exported as ${selectedExportFormat.toUpperCase()}!`);
+        closeExportModal();
+      }
+
+      async function loadOverviewTable(cls) {
+        const keys = await getAllAttendanceKeys();
+        const dates = [
+          ...new Set(
+            keys
+              .filter((k) => k.startsWith(`${cls.classCode}::`))
+              .map((k) => k.split("::")[1])
+          ),
+        ].sort();
+
+        if (dates.length === 0) {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+          return;
+        }
+
+        noOverview.classList.add("hidden");
+        overviewContent.classList.remove("hidden");
+        overviewClassCode.textContent = cls.classCode;
+
+        let html =
+          "<thead><tr><th>Student Code</th><th>Name</th><th>Family</th><th>Field</th>";
+        dates.forEach((d) => {
+          html += `<th class="date-header">${formatShortDate(
+            d
+          )}<button class="delete-date-btn" data-date="${d}" title="Delete this date">&times;</button></th>`;
+        });
+        html += "</tr></thead><tbody>";
+
+        for (const s of cls.students) {
+          html += `<tr><td>${s.code}</td><td>${s.name}</td><td>${s.family}</td><td>${s.field}</td>`;
+          for (const d of dates) {
+            const records = (await loadAttendance(cls.classCode, d)) || {};
+            const status = records[s.code] || "present";
+            let clsName = "",
+              txt = "";
+            if (status === "present") {
+              clsName = "status-present";
+              txt = "✓";
+            } else if (status === "absent") {
+              clsName = "status-absent";
+              txt = "✗";
+            } else if (status === "late") {
+              clsName = "status-late";
+              txt = "!";
+            }
+            html += `<td style="text-align:center;"><div class="status-indicator ${clsName}">${txt}</div></td>`;
+          }
+          html += "</tr>";
+        }
+        html += "</tbody>";
+        overviewTable.innerHTML = html;
+
+        document.querySelectorAll(".delete-date-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showDeleteConfirmation(btn.dataset.date);
+          });
+        });
+      }
+
+      function showDeleteConfirmation(date) {
+        dateToDelete = date;
+        deleteDateDisplay.textContent = formatDate(date);
+        deleteModal.classList.add("show");
+      }
+
+      async function deleteAttendanceRecord() {
+        if (!currentClass || !dateToDelete) return;
+        await deleteAttendance(currentClass.classCode, dateToDelete);
+        showNotification("Attendance record deleted successfully!");
+        deleteModal.classList.remove("show");
+        if (
+          isOverviewMode &&
+          overviewClassSelect.value === currentClass.classCode
+        ) {
+          await loadOverviewTable(currentClass);
+        }
+        await loadOverviewClasses();
+        if (currentDate === dateToDelete) {
+          classView.classList.add("hidden");
+          dashboardView.classList.remove("hidden");
+          currentDate = null;
+        }
+        dateToDelete = null;
+      }
+
+      function confirmNavigation(action) {
+        if (hasUnsavedChanges && !isNavigatingAway) {
+          pendingNavigationAction = action;
+          confirmModal.classList.add("show");
+          return false;
+        }
+        return true;
+      }
+
+      function handleBackToClasses() {
+        if (
+          hasUnsavedChanges &&
+          !confirmNavigation(() => {
+            classView.classList.add("hidden");
+            dashboardView.classList.remove("hidden");
+            hasUnsavedChanges = false;
+          })
+        )
+          return;
+        classView.classList.add("hidden");
+        dashboardView.classList.remove("hidden");
+        hasUnsavedChanges = false;
+      }
+
+      // =============== INIT ===============
+      (async () => {
+        await loadBaseData();
+        const savedProf = await getActiveProfessor();
+        if (savedProf && baseData.professors.some((p) => p.id === savedProf)) {
+          profCodeInput.value = savedProf;
+          await login();
+        }
+      })();
+
+      // Register Service Worker
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js");
+        });
+      }
+
+      // =============== EVENT LISTENERS ===============
+      loginBtn.addEventListener("click", login);
+      logoutBtn.addEventListener("click", logout);
+      selectDateBtn.addEventListener("click", selectDate);
+      saveAttendanceBtn.addEventListener("click", saveAttendance);
+      deleteDateBtn.addEventListener(
+        "click",
+        () => currentDate && showDeleteConfirmation(currentDate)
+      );
+      exportAttendanceBtn.addEventListener("click", () => {
+        isOverviewMode = false;
+        showExportModal();
+      });
+      exportOverviewBtn.addEventListener("click", () => {
+        isOverviewMode = true;
+        showExportModal();
+      });
+      backToClassList.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      backFromDate.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      backToClassesBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleBackToClasses();
+      });
+      closeModal.addEventListener("click", closeExportModal);
+      exportModal.addEventListener(
+        "click",
+        (e) => e.target === exportModal && closeExportModal()
+      );
+      confirmExportBtn.addEventListener("click", exportAttendance);
+      exportOptions.forEach((opt) =>
+        opt.addEventListener("click", () =>
+          selectExportFormat(opt.dataset.format)
+        )
+      );
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          if (hasUnsavedChanges && !confirmNavigation(() => switchTab(tab)))
+            return;
+          switchTab(tab);
+        });
+      });
+      function switchTab(tab) {
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        if (tab.dataset.tab === "classes") {
+          classesTab.classList.remove("hidden");
+          overviewTab.classList.add("hidden");
+        } else {
+          classesTab.classList.add("hidden");
+          overviewTab.classList.remove("hidden");
+          if (overviewClassSelect.value) {
+            const cls = baseData.classes.find(
+              (c) => c.classCode === overviewClassSelect.value
+            );
+            cls && loadOverviewTable(cls);
+          }
+        }
+      }
+      overviewClassSelect.addEventListener("change", async () => {
+        if (overviewClassSelect.value) {
+          const cls = baseData.classes.find(
+            (c) => c.classCode === overviewClassSelect.value
+          );
+          cls && (await loadOverviewTable(cls));
+        } else {
+          noOverview.classList.remove("hidden");
+          overviewContent.classList.add("hidden");
+        }
+      });
+      confirmDeleteBtn.addEventListener("click", deleteAttendanceRecord);
+      cancelDeleteBtn.addEventListener("click", () => {
+        deleteModal.classList.remove("show");
+        dateToDelete = null;
+      });
+      confirmLeaveBtn.addEventListener("click", () => {
+        confirmModal.classList.remove("show");
+        isNavigatingAway = true;
+        pendingNavigationAction && pendingNavigationAction();
+        isNavigatingAway = false;
+        hasUnsavedChanges = false;
+      });
+      confirmStayBtn.addEventListener("click", () => {
+        confirmModal.classList.remove("show");
+        pendingNavigationAction = null;
+      });
+      window.addEventListener("beforeunload", (e) => {
+        if (hasUnsavedChanges) {
+          e.preventDefault();
+          e.returnValue = "";
+          return "";
+        }
+      });
+    </script>
+  </body>
+</html>
