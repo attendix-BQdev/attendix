@@ -1076,7 +1076,7 @@
 
       async function loadBaseData() {
         try {
-          const res = await fetch("/data.json");
+          const res = await fetch("attendix/data.json");
           baseData = await res.json();
         } catch (e) {
           console.error("Failed to load data.json", e);
@@ -1636,3 +1636,4 @@
     </script>
   </body>
 </html>
+
